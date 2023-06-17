@@ -1,6 +1,5 @@
-
 import { z } from "zod";
-import type { User } from "@clerk/nextjs/dist/api"
+import type { User } from "@clerk/backend/dist/types";
 import { clerkClient } from "@clerk/nextjs/server"
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";

@@ -1,5 +1,6 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import Head from "next/head";
+import Image from "next/image";
 import { api, RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -9,10 +10,9 @@ dayjs.extend(relativeTime);
 const CreatePostWizard = () => {
   const {user} = useUser();
   if (!user) return null;
-  console.log(user);
 
   return <div className="flex gap-3">
-    <img src={user.profileImageUrl} alt="Profile image" className="h-16 w-16 rounded-full" />
+    <Image src={user.profileImageUrl} alt="Profile image" className="h-16 w-16 rounded-full" />
     <input placeholder="Type some emojis!" className="grow bg-transparent" />
   </div>
 }
@@ -21,7 +21,7 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 const PostView = (props: PostWithUser) => {
   const {author, post} = props;
   return <div className="border-b border-slate-400 p-4 flex gap-3">
-    <img src={author.profileImageUrl} className="h-16 w-16 rounded-full" />
+    <Image src={author.profileImageUrl} alt="Author's profile picture" className="h-16 w-16 rounded-full" />
     <div className="flex flex-col">
       <div className="flex text-slate-300">
         <span>@{author.username}</span>
@@ -33,9 +33,9 @@ const PostView = (props: PostWithUser) => {
 
 export default function Home() {
   const { data, isLoading } = api.posts.getAll.useQuery();
+  const { isSignedIn } = useUser();
   if (isLoading) return <div>Now loading...</div>;
   if (!data) return <div>No posts found!</div>;
-  const {isSignedIn} = useUser();
   return (
     <>
       <Head>
