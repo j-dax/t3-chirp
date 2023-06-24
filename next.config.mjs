@@ -18,5 +18,9 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  // configure images to route though clerk
+  images: {
+    domains: ["images.clerk.dev"], 
+  },
 };
 export default config;
