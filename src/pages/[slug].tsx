@@ -1,6 +1,10 @@
 import Head from "next/head";
-import { api, RouterOutputs } from "~/utils/api";
-import type { GetStaticProps, NextPage } from "next";
+import { api, type RouterOutputs } from "~/utils/api";
+import PageLayout from "~/components/layout";
+import type { NextPage } from "next";
+import Image from "next/image";
+import { SpinnerPage } from "~/components/spinner";
+import { PostView } from "~/components/PostView";
 
 type PostWithUser = RouterOutputs["posts"]["getPostsByUserId"][number];
 const ProfileFeed = (props: {userId: string}) => {
@@ -13,7 +17,7 @@ const ProfileFeed = (props: {userId: string}) => {
     <div className="flex flex-col">
       {data.map((fullPost: PostWithUser) => <PostView key={fullPost.author.id} {...fullPost} />)}
     </div>
-    </>;
+  </>;
 }
 
 const ProfilePage: NextPage<{username: string}> = ({ username }) => {
@@ -25,7 +29,7 @@ const ProfilePage: NextPage<{username: string}> = ({ username }) => {
   return (
     <>
       <Head>
-        <title>X Profile</title>
+        <title>{username}&apos;s Profile Page</title>
       </Head>
       <PageLayout>
         <div className="relative h-48 bg-slate-600">
@@ -45,22 +49,10 @@ const ProfilePage: NextPage<{username: string}> = ({ username }) => {
 }
 export default ProfilePage;
 
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import { appRouter } from "~/server/api/root";    
-import { prisma } from "~/server/db";
-import superjson from "superjson"
-import PageLayout from "~/components/layout";
-import Image from "next/image";
-import { SpinnerPage } from "~/components/spinner";
-import { PostView } from "~/components/PostView";
-
+import { GetSSGHelper } from "~/server/api/ssg";
+import type { GetStaticProps } from "next";
 export const getStaticProps: GetStaticProps = async (context) => {
-  const ssg = createServerSideHelpers({
-    router: appRouter,
-    ctx: { prisma, userId: null },
-    transformer: superjson,
-  });
-
+  const ssg = GetSSGHelper();
   const slug = context.params?.slug;
   if (typeof slug !== "string") throw new Error("no slug");
   const username = slug.replace("@", "");

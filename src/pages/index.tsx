@@ -12,7 +12,7 @@ const CreatePostWizard = () => {
   //  cull useState in favor of zod and react hook form
   //  This currently results in sticky-key behavior. empty while editing then appearing all at once
   const [ input, setInput ] = useState("");
-  const {user} = useUser();
+  const { user } = useUser();
   if (!user) return null;
 
   const ctx = api.useContext();
@@ -79,6 +79,8 @@ export default function Home() {
         { !isSignedIn && <SignInButton /> }
         { isSignedIn && <CreatePostWizard /> }
       </div>
-      <Feed />
+      <div className="w-full h-full flex items-center justify-center">
+        <Feed />
+      </div>
     </PageLayout>;
 }

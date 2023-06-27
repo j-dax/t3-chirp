@@ -49,6 +49,18 @@ const rateLimiter = new Ratelimit({
 })
 
 export const postsRouter = createTRPCRouter({
+  getById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ctx, input}) => {
+      const post = await ctx.prisma.post
+        .findUnique({ where: { id: input.id }});
+      if (!post) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+      return addUserDataToPosts([post]);
+    }),
   getAll: publicProcedure
     .query(async ({ctx}) => ctx.prisma.post.findMany({
         take: 100,
@@ -66,7 +78,10 @@ export const postsRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().emoji("Only emoji are allowed").min(1).max(280),
+        content: z.string()
+          .emoji("Only emoji are allowed")
+          .min(1)
+          .max(280),
       }))
     .mutation(async ({ctx, input}) => {
       const authorId = ctx.userId;
