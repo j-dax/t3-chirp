@@ -2,17 +2,7 @@ import { z } from "zod";
 import { clerkClient } from "@clerk/nextjs/server"
 import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-
-import type { User } from "@clerk/backend/dist/types";
-const mapUserForClient = (user: User) => {
-  return {
-    id: user.id,
-    username: user.username,
-    profileImageUrl: user.profileImageUrl,
-    externalUsername: user.externalAccounts
-      .find((externalAccount) => externalAccount.provider === "oauth_github")?.username || null,
-  }
-}
+import { mapUserForClient } from "./filter";
 
 import type { Post } from "@prisma/client";
 const addUserDataToPosts = async (posts: Post[]) => {
