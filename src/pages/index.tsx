@@ -5,15 +5,31 @@ import { api, type RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { SpinnerPage } from "~/components/spinner";
+import { useState } from "react";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const {user} = useUser();
   if (!user) return null;
 
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    }
+  });
+  const [ input, setInput ] = useState("");
   return <div className="flex justify-center gap-3">
     <Image src={user.profileImageUrl} alt="Profile image" className="h-16 w-16 rounded-full" width="56" height="56" />
-    <input placeholder="Type some emojis!" className="grow bg-transparent" />
+    <input
+      placeholder="Type some emojis!"
+      className="grow bg-transparent"
+      value={input}
+      onChange={ (e) => setInput(e.target.value) }
+      disabled={isPosting}
+    />
+    <button onClick={() => mutate({ content: input })}>Post</button>
   </div>
 }
 
@@ -36,7 +52,7 @@ const Feed = () => {
   if (postsLoading) return <SpinnerPage />;
   if (!data) return <div>Something went wrong!</div>;
   return <div className="flex flex-col">
-      {data?.map((props: PostWithUser) => (
+      {data.map((props: PostWithUser) => (
         <PostView key={props.post.id} {...props} />
       ))}
     </div>
