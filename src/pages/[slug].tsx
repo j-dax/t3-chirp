@@ -1,6 +1,20 @@
 import Head from "next/head";
-import { api } from "~/utils/api";
+import { api, RouterOutputs } from "~/utils/api";
 import type { GetStaticProps, NextPage } from "next";
+
+type PostWithUser = RouterOutputs["posts"]["getPostsByUserId"][number];
+const ProfileFeed = (props: {userId: string}) => {
+  const {data, isLoading} = api.posts.getPostsByUserId.useQuery({
+    userId: props.userId,
+  });
+  if (isLoading) return <SpinnerPage />;
+  if (!data || data.length == 0) return <div>User has not posted.</div>;
+  return <>
+    <div className="flex flex-col">
+      {data.map((fullPost: PostWithUser) => <PostView key={fullPost.author.id} {...fullPost} />)}
+    </div>
+    </>;
+}
 
 const ProfilePage: NextPage<{username: string}> = ({ username }) => {
   const {data: user, isLoading: userLoading} = api.profile.getUserByUsername.useQuery({
@@ -24,6 +38,7 @@ const ProfilePage: NextPage<{username: string}> = ({ username }) => {
         <div className="h-[64px]"></div>
         <div className="p-4 text-2xl font-bold">@{username}</div>
         <div className="border-b border-slate-400"></div>
+        <ProfileFeed userId={user.id} />
       </PageLayout>
     </>
   );
@@ -36,6 +51,8 @@ import { prisma } from "~/server/db";
 import superjson from "superjson"
 import PageLayout from "~/components/layout";
 import Image from "next/image";
+import { SpinnerPage } from "~/components/spinner";
+import { PostView } from "~/components/PostView";
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const ssg = createServerSideHelpers({
