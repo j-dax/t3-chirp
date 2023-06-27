@@ -1,11 +1,10 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Head from "next/head";
-import { api, RouterOutputs } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { SpinnerPage } from "~/components/spinner";
-
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -25,7 +24,7 @@ const PostView = (props: PostWithUser) => {
     <Image src={author.profileImageUrl} alt="Author's profile picture" className="h-16 w-16 rounded-full" width="56" height="56" />
     <div className="flex flex-col">
       <div className="flex text-slate-300">
-        <span><a href={`https://github.com/${author.username}`}>@{author.username}</a> · {dayjs(post.createdAt).fromNow()}</span>
+        <span><a href={`https://github.com/${author.username}`}>@{`${author.username}`}</a> · {dayjs(post.createdAt).fromNow()}</span>
       </div>
       <span className="text-2xl">{`${post.content}`}</span>
     </div>
@@ -37,11 +36,10 @@ const Feed = () => {
   if (postsLoading) return <SpinnerPage />;
   if (!data) return <div>Something went wrong!</div>;
   return <div className="flex flex-col">
-      {data?.map((props: any) => (
+      {data?.map((props: PostWithUser) => (
         <PostView key={props.post.id} {...props} />
       ))}
     </div>
-
 }
 
 export default function Home() {

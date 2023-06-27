@@ -1,4 +1,4 @@
-export const Spinner = (props: {size?: number}) => {
+export const Spinner = ({size}: {size: number | undefined}) => {
   return <div role="status">
     <svg aria-hidden="true"
       className="w-16 h-16 mr-2 text-slate-200 animate-spin dark:text-slate-600 fill-yellow-600"
