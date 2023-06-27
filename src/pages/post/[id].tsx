@@ -8,7 +8,6 @@ import { useState } from "react";
 import toast from "react-hot-toast"
 
 import dayjs from "dayjs";
-import Link from "next/link";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -77,7 +76,7 @@ const PostView = (props: PostWithUser) => {
     <Image src={author.profileImageUrl} alt="Author's profile picture" className="h-16 w-16 rounded-full" width="56" height="56" />
     <div className="flex flex-col">
       <div className="flex text-slate-300">
-        <Link href={`/@${author.username}`}><span>@{`${author.username}`} · {dayjs(post.createdAt).fromNow()}</span></Link>
+        <span><a href={`https://github.com/${author.username}`}>@{`${author.username}`}</a> · {dayjs(post.createdAt).fromNow()}</span>
       </div>
       <span className="text-2xl">{`${post.content}`}</span>
     </div>
