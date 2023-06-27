@@ -4,7 +4,7 @@ import Head from "next/head";
 import { api, RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import SpinnerPage from "~/components/spinner";
+import { SpinnerPage } from "~/components/spinner";
 
 dayjs.extend(relativeTime);
 
