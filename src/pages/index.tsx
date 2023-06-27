@@ -4,6 +4,7 @@ import Head from "next/head";
 import { api, RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import SpinnerPage from "~/components/spinner";
 
 dayjs.extend(relativeTime);
 
@@ -26,16 +27,31 @@ const PostView = (props: PostWithUser) => {
       <div className="flex text-slate-300">
         <span><a href={`https://github.com/${author.username}`}>@{author.username}</a> · {dayjs(post.createdAt).fromNow()}</span>
       </div>
-      <span>{`${post.content}`}</span>
+      <span className="text-2xl">{`${post.content}`}</span>
     </div>
   </div>
 }
 
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+  if (postsLoading) return <SpinnerPage />;
+  if (!data) return <div>Something went wrong!</div>;
+  return <div className="flex flex-col">
+      {data?.map((props: any) => (
+        <PostView key={props.post.id} {...props} />
+      ))}
+    </div>
+
+}
+
 export default function Home() {
-  const { data, isLoading } = api.posts.getAll.useQuery();
-  const { isSignedIn } = useUser();
-  if (isLoading) return <div>Now loading...</div>;
-  if (!data) return <div>No posts found!</div>;
+  const { isSignedIn, isLoaded: userLoaded } = useUser();
+
+  // prepare fetch asap
+  api.posts.getAll.useQuery();
+
+  // return an empty div if user isn't loaded yet
+  if (!userLoaded) return <div />
   return (
     <>
       <Head>
@@ -50,16 +66,11 @@ export default function Home() {
             {isSignedIn && (
               <div className="flex justify-center">
                 <CreatePostWizard />
-                { /*<SignOutButton />*/ }
+                <Feed />
               </div>)
             }
           </div>
-          <div className="flex flex-col">
-            {data?.map(props => (
-              <PostView key={props.post.id} {...props} />
-            ))}
           </div>
-        </div>
       </main>
     </>
   );
