@@ -49,6 +49,15 @@ const addUserDataToPosts = async (posts: Post[]) => {
   })
 }
 
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis/nodejs";
+// Restrict the number of posts per user
+const rateLimiter = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, "1 m"),
+  analytics: true,
+})
+
 export const postsRouter = createTRPCRouter({
   getAll: publicProcedure
     .query(async ({ctx}) => {
@@ -66,6 +75,14 @@ export const postsRouter = createTRPCRouter({
     .mutation(async ({ctx, input}) => {
       const authorId = ctx.userId;
       
+      const { success } = await rateLimiter.limit(ctx.userId);
+      if (!success) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Too many requests sent from ${ctx.userId}`
+        });  
+      }
+    
       const post = await ctx.prisma.post.create({
         data: {
           authorId,

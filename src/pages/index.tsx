@@ -2,13 +2,16 @@ import { SignInButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Head from "next/head";
 import { api, type RouterOutputs } from "~/utils/api";
-import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { SpinnerPage } from "~/components/spinner";
+import { SpinnerPage, Spinner } from "~/components/spinner";
 import { useState } from "react";
+import toast from "react-hot-toast"
+
+import dayjs from "dayjs";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
+  const [ input, setInput ] = useState("");
   const {user} = useUser();
   if (!user) return null;
 
@@ -17,19 +20,44 @@ const CreatePostWizard = () => {
     onSuccess: () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
     }
   });
-  const [ input, setInput ] = useState("");
-  return <div className="flex justify-center gap-3">
+  return <div className="flex justify-center w-full gap-3">
     <Image src={user.profileImageUrl} alt="Profile image" className="h-16 w-16 rounded-full" width="56" height="56" />
     <input
       placeholder="Type some emojis!"
       className="grow bg-transparent"
       value={input}
       onChange={ (e) => setInput(e.target.value) }
+      onKeyDown={ (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (input !== "") {
+            mutate({ content: input });
+          }
+        }
+      }}
       disabled={isPosting}
     />
-    <button onClick={() => mutate({ content: input })}>Post</button>
+    { input != "" && !isPosting &&
+      <button
+        onClick={() => mutate({ content: input })}
+        disabled={isPosting}
+      >Post</button>
+    }
+    { isPosting &&
+      <div className="flex items-center justify-center">
+        <Spinner size={1000} />
+      </div>
+    }
   </div>
 }
 
